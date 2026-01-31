@@ -1,0 +1,53 @@
+# ================================================
+# ComfyUI-ZHIHUI (智绘灵箱) 依赖库
+# ================================================
+
+# 基础依赖
+torch>=2.0.0
+torchvision>=0.15.0
+numpy>=1.24.0
+pillow>=10.0.0
+requests>=2.31.0
+scipy>=1.10.0  # 用于边缘羽化
+
+# 图片反推功能 (Image Captioning)
+# 注意: Qwen3-VL 模型需要 transformers >= 4.57.0
+transformers>=4.57.0
+accelerate>=0.24.0
+huggingface-hub>=0.19.0
+modelscope>=1.9.0  # 用于从 ModelScope 下载模型（可选）
+psutil>=5.9.0  # 用于系统信息检测
+bitsandbytes>=0.41.0  # 用于模型量化（4-bit/8-bit）
+opencv-python>=4.8.0  # 用于图像处理
+
+# 图片抠图功能 (Background Removal)
+rembg>=2.0.50
+onnxruntime>=1.16.0  # rembg 依赖
+
+# PSD 文件保存功能
+pytoshop>=1.2.1  # 用于保存多图层 PSD 文件
+
+# 可选：GPU 加速（如果使用 CUDA）
+# onnxruntime-gpu>=1.16.0  # 取消注释以启用 GPU 加速抠图
+
+# API 集成依赖
+urllib3>=2.0.0
+
+# ================================================
+# 安装说明
+# ================================================
+# 1. 基础安装：pip install -r requirements.txt
+# 2. 如果使用 GPU 进行抠图加速，请手动安装：
+#    pip uninstall onnxruntime
+#    pip install onnxruntime-gpu
+# 3. 首次使用图片反推功能时，会自动下载模型（约 1-14GB，取决于模型）
+#    - 模型存储位置：ComfyUI/models/prompt_generator/
+#    - 支持的模型类型：BLIP、BLIP2、Qwen2-VL、Qwen3-VL
+# 4. 首次使用抠图功能时，会自动下载模型（约 176MB）
+# 5. 重要：使用 Qwen3-VL 模型需要 transformers >= 4.57.0
+#    如果已安装旧版本，请运行：pip install --upgrade transformers
+# 6. 可选安装（提升性能）：
+#    - Flash Attention 2（需要 CUDA 和计算能力 >= 8.0 的 GPU）：
+#      pip install flash-attn>=2.0.0 --no-build-isolation
+#    - ModelScope（用于从国内镜像下载模型）：
+#      pip install modelscope
