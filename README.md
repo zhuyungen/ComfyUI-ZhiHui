@@ -46,6 +46,7 @@ pip install -r requirements.txt
 ## 🎯 主要功能 / Main Features
 
 ### 🖼️ 图像处理 / Image Processing
+- **🎨 画板 (Drawing Board)**: 内置画板节点，支持多图层绘画、抠图、图形编辑，可接收上游图片并输出绘制结果
 - **智绘_九宫格拼图**: 批次图片网格排列拼接
 - **智绘_图片切换器**: 多图像智能切换选择
 - **智绘_制作批次**: 单图转批次处理
@@ -69,6 +70,7 @@ pip install -r requirements.txt
 ### 图像类节点 / Image Nodes
 | 节点名称 | 英文名称 | 功能描述 |
 |---------|---------|---------|
+| 🎨 画板 | Drawing Board | 多图层画板，支持画笔/橡皮/文字/图形/抠图，可接收上游图片输入 |
 | 🪣 智绘_九宫格拼图 | Grid Image Assembler | 批次图片网格排列拼接 |
 | 🔄 智绘_图片切换器 | Image Multi Switch | 多图像智能切换选择 |
 | 📦 智绘_制作批次 | Make Image Batch | 单图转批次处理 |
