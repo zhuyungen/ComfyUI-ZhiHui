@@ -75,6 +75,10 @@ from .background_remover import NODE_DISPLAY_NAME_MAPPINGS as BgRemover_Names
 from .save_psd import NODE_CLASS_MAPPINGS as SavePSD_Mappings
 from .save_psd import NODE_DISPLAY_NAME_MAPPINGS as SavePSD_Names
 
+# 18. 画板
+from .drawing_board import NODE_CLASS_MAPPINGS as DrawingBoard_Mappings
+from .drawing_board import NODE_DISPLAY_NAME_MAPPINGS as DrawingBoard_Names
+
 # 合并字典
 NODE_CLASS_MAPPINGS = {
     **Cleaner_Mappings,
@@ -94,6 +98,7 @@ NODE_CLASS_MAPPINGS = {
     **BgRemover_Mappings,
     **SavePSD_Mappings,
     **Organizer_Mappings,
+    **DrawingBoard_Mappings,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
@@ -114,6 +119,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     **BgRemover_Names,
     **SavePSD_Names,
     **Organizer_Names,
+    **DrawingBoard_Names,
 }
 
 __all__ = ['NODE_CLASS_MAPPINGS', 'NODE_DISPLAY_NAME_MAPPINGS']
