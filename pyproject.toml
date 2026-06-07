@@ -14,5 +14,5 @@ dependencies = [
 Repository = "https://github.com/zhuyungen/ComfyUI-ZhiHui"
 
 [tool.comfy]
-publisher-id = "zhuyungen"
-display-name = "智绘灵箱"
+PublisherId = "zhuyungen"
+DisplayName = "智绘灵箱"
