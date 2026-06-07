@@ -12,7 +12,7 @@ A feature-rich ComfyUI custom node plugin providing image processing, text opera
 Run in your ComfyUI's `custom_nodes` directory:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ComfyUI-ZHIHUI.git
+git clone https://github.com/zhuyungen/ComfyUI-ZhiHui.git
 ```
 
 然后重启 ComfyUI 或使用 ComfyUI Manager 重新加载节点。
