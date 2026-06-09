@@ -197,11 +197,9 @@ app.registerExtension({
 
             // 监听上游图片传入
             const self = this;
-            self._ignoreNextInput = false;
             api.addEventListener("zh_drawing_board_input", (event) => {
                 const { id, url, width, height } = event.detail;
                 if (String(id) !== String(self.id)) return;
-                if (self._ignoreNextInput) { self._ignoreNextInput = false; return; }
                 const img = new Image(); img.src = url;
                 img.onload = () => {
                     const state = self._boardState;
@@ -525,7 +523,6 @@ app.registerExtension({
                     if (imgWidget) imgWidget.value = dataUrl;
                     if (!nodeRef.widgets_values) nodeRef.widgets_values = [];
                     nodeRef.widgets_values[0] = dataUrl;
-                    nodeRef._ignoreNextInput = true;
                     // 构建只包含画板节点及其下游的最小 prompt，不重跑上游
                     const fullPrompt = await app.graphToPrompt();
                     const allOutput = fullPrompt.output;
