@@ -191,6 +191,7 @@ app.registerExtension({
                 lasso: null,
                 lassoConfirming: false,
                 imageCache: new Map(),
+                _boardCleared: true,
             };
             this._boardState.activeLayerId = this._boardState.layers[0].id;
 
@@ -208,30 +209,42 @@ app.registerExtension({
                     const dw = Math.round(width * scale);
                     const dh = Math.round(height * scale);
                     const el = { id: uid("image"), kind: "image", url, _img: img, x: 0, y: 0, w: dw, h: dh, rotation: 0, opacity: 1, _isInput: true };
-                    // 优先复用已指定的输入图层
-                    if (self._inputLayerId) {
-                        const existing = state.layers.find(l => l.id === self._inputLayerId);
-                        if (existing) {
-                            // 替换该层中的输入图片元素（保留用户绘制的其他元素）
-                            const hasInput = existing.elements.some(e => e._isInput);
-                            if (hasInput) {
-                                existing.elements = existing.elements.map(e => e._isInput ? el : e);
-                            } else {
-                                existing.elements.unshift(el);
-                            }
-                            return;
-                        }
-                    }
-                    // 输入图层不存在时，始终使用 firstLayer，不新建图层
-                    const firstLayer = state.layers[0];
-                    const hasInput = firstLayer.elements.some(e => e._isInput);
-                    if (hasInput) {
-                        firstLayer.elements = firstLayer.elements.map(e => e._isInput ? el : e);
+                    const hasContent = state.layers.some(l => l.elements.length > 0);
+                    if (!state._boardCleared && hasContent) {
+                        // 画板有内容且未清空：在最底层新建图层放入新图
+                        const inputLayer = newLayer(state.layers.length + 1);
+                        inputLayer.elements.push(el);
+                        state.layers.unshift(inputLayer);
+                        self._inputLayerId = inputLayer.id;
                     } else {
-                        firstLayer.elements.unshift(el);
+                        // 清空过或画板为空：复用图层正常加载
+                        state._boardCleared = false;
+                        if (self._inputLayerId) {
+                            const existing = state.layers.find(l => l.id === self._inputLayerId);
+                            if (existing) {
+                                const hasInput = existing.elements.some(e => e._isInput);
+                                if (hasInput) {
+                                    existing.elements = existing.elements.map(e => e._isInput ? el : e);
+                                } else {
+                                    existing.elements.unshift(el);
+                                }
+                                self._redrawBoard?.();
+                                self._refreshLayers?.();
+                                return;
+                            }
+                        }
+                        const firstLayer = state.layers[0];
+                        const hasInput = firstLayer.elements.some(e => e._isInput);
+                        if (hasInput) {
+                            firstLayer.elements = firstLayer.elements.map(e => e._isInput ? el : e);
+                        } else {
+                            firstLayer.elements.unshift(el);
+                        }
+                        state.activeLayerId = firstLayer.id;
+                        self._inputLayerId = firstLayer.id;
                     }
-                    state.activeLayerId = firstLayer.id;
-                    self._inputLayerId = firstLayer.id;
+                    self._redrawBoard?.();
+                    self._refreshLayers?.();
                 };
             });
 
@@ -400,7 +413,7 @@ app.registerExtension({
             const clearBtn = document.createElement("button");
             clearBtn.textContent = "🗑 清空";
             clearBtn.style.cssText = "padding:4px 10px;border-radius:6px;border:1px solid rgba(148,163,184,.3);background:transparent;color:#cbd5e1;cursor:pointer;font-size:12px;";
-            clearBtn.onclick = () => { if (!confirm("清空画板？")) return; pushUndo(); state.layers = [newLayer(1)]; state.activeLayerId = state.layers[0].id; state.selId = null; redraw(); refreshLayers(); };
+            clearBtn.onclick = () => { if (!confirm("清空画板？")) return; pushUndo(); state.layers = [newLayer(1)]; state.activeLayerId = state.layers[0].id; state.selId = null; state._boardCleared = true; self._inputLayerId = null; redraw(); refreshLayers(); };
             header.appendChild(clearBtn);
 
             // spacer + 关闭
@@ -409,7 +422,7 @@ app.registerExtension({
             const closeBtn = document.createElement("button");
             closeBtn.textContent = "✕";
             closeBtn.style.cssText = "padding:4px 10px;border-radius:6px;border:none;background:transparent;color:#94a3b8;cursor:pointer;font-size:16px;";
-            closeBtn.onclick = () => { dismissLassoActions(); document.body.removeChild(panel); };
+            closeBtn.onclick = () => { dismissLassoActions(); document.body.removeChild(panel); self._redrawBoard = null; self._refreshLayers = null; };
             header.appendChild(closeBtn);
 
             // 拖动逻辑
@@ -657,6 +670,8 @@ app.registerExtension({
             function redraw() {
                 renderBoard(canvas, state.layers, state.bw, state.bh, state.selId, state.lasso);
             }
+            self._redrawBoard = redraw;
+            self._refreshLayers = refreshLayers;
             redraw();
 
             // ---- 画布交互 ----
