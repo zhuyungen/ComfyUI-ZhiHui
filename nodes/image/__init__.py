@@ -43,15 +43,7 @@ from .safe_loader import NODE_DISPLAY_NAME_MAPPINGS as SafeLoader_Names
 from .save_image_with_time import NODE_CLASS_MAPPINGS as SaveTime_Mappings
 from .save_image_with_time import NODE_DISPLAY_NAME_MAPPINGS as SaveTime_Names
 
-# 10. 批量视频加载器
-from .batch_video_loader import NODE_CLASS_MAPPINGS as VideoLoader_Mappings
-from .batch_video_loader import NODE_DISPLAY_NAME_MAPPINGS as VideoLoader_Names
-
-# 11. 纯净视频保存
-from .video_saver import NODE_CLASS_MAPPINGS as VideoSaver_Mappings
-from .video_saver import NODE_DISPLAY_NAME_MAPPINGS as VideoSaver_Names
-
-# 12. 文件归档器
+# 10. 文件归档器
 from .file_organizer import NODE_CLASS_MAPPINGS as Organizer_Mappings
 from .file_organizer import NODE_DISPLAY_NAME_MAPPINGS as Organizer_Names
 
@@ -90,9 +82,7 @@ NODE_CLASS_MAPPINGS = {
     **Cropper_Mappings,
     **SafeLoader_Mappings,
     **SaveTime_Mappings,
-    **VideoLoader_Mappings,
-    **VideoSaver_Mappings,
-    **SubfolderV3_Mappings,   # 仅保留 V3 版本
+    **SubfolderV3_Mappings,
     **ImgLoader_Mappings,
     **Caption_Mappings,
     **BgRemover_Mappings,
@@ -111,9 +101,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     **Cropper_Names,
     **SafeLoader_Names,
     **SaveTime_Names,
-    **VideoLoader_Names,
-    **VideoSaver_Names,
-    **SubfolderV3_Names,      # 仅保留 V3 版本
+    **SubfolderV3_Names,
     **ImgLoader_Names,
     **Caption_Names,
     **BgRemover_Names,

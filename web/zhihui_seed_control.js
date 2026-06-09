@@ -2,7 +2,7 @@ import { app } from "../../scripts/app.js";
 
 // 为智绘运行节点添加seed控制功能
 app.registerExtension({
-    name: "ZHIHUI.SeedControl",
+    name: "ZhiHui.SeedControl",
     async beforeRegisterNodeDef(nodeType, nodeData) {
         if (nodeData.name === "ZH_RunNode") {
             const onNodeCreated = nodeType.prototype.onNodeCreated;

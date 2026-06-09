@@ -19,7 +19,6 @@ try:
     REMBG_AVAILABLE = True
 except ImportError:
     REMBG_AVAILABLE = False
-    print("⚠️ [智绘抠图] rembg 库未安装，请运行: pip install rembg")
 
 # 注册 RMBG 模型路径
 folder_paths.add_model_folder_path("rmbg", os.path.join(folder_paths.models_dir, "RMBG"))
@@ -157,7 +156,9 @@ def get_rembg_model_path():
 # rembg 支持的标准模型名称列表
 REMBG_STANDARD_MODELS = [
     "u2net", "u2netp", "u2net_human_seg", "u2net_cloth_seg",
-    "silueta", "isnet-general-use", "isnet-anime", "sam"
+    "silueta", "isnet-general-use", "isnet-anime", "sam",
+    "birefnet-general", "birefnet-general-lite", "birefnet-portrait",
+    "birefnet-dis", "birefnet-hrsod", "birefnet-cod",
 ]
 
 # rembg标准模型 -> 中文友好显示名称
@@ -166,10 +167,16 @@ REMBG_DISPLAY_NAMES = {
     "u2netp": "U2-Net 快速版 (速度优先)",
     "u2net_human_seg": "U2-Net 人像专用",
     "u2net_cloth_seg": "U2-Net 服装电商",
-    "silueta": "Silueta 人像高精度 (细节)",
-    "isnet-general-use": "IS-Net 新一代通用 (最新)",
+    "silueta": "Silueta 人像高精度",
+    "isnet-general-use": "IS-Net 新一代通用",
     "isnet-anime": "IS-Net 动漫专用 (二次元)",
-    "sam": "SAM 分割模型 (Meta)"
+    "sam": "SAM 分割模型 (Meta)",
+    "birefnet-general": "BiRefNet 通用高精度 (RMBG推荐)",
+    "birefnet-general-lite": "BiRefNet 快速版",
+    "birefnet-portrait": "BiRefNet 人像专用",
+    "birefnet-dis": "BiRefNet 二分图像分割",
+    "birefnet-hrsod": "BiRefNet 高分辨率显著目标",
+    "birefnet-cod": "BiRefNet 伪装目标检测",
 }
 
 # 模型名称映射（显示名称 -> 智绘模型ID） - 保留向后兼容
@@ -285,9 +292,9 @@ def scan_local_rmbg_models():
                         continue
 
                     # 标准化模型名称
-                    # 支持 RMBG-2.0 -> u2net, RMBG-1.4 -> u2net 等
+                    # RMBG-1.4 / RMBG-2.0 对应 birefnet-general
                     if model_name.lower().startswith("rmbg"):
-                        normalized_name = "u2net"  # RMBG 通常对应 u2net
+                        normalized_name = "birefnet-general"
                     else:
                         normalized_name = normalize_model_name(model_name)
 
@@ -307,7 +314,6 @@ def scan_local_rmbg_models():
                         "original_name": model_name,
                         "source": source_name
                     }
-                    print(f"[智绘抠图] ✅ 发现本地模型: {normalized_name} (来自 {source_name}/{model_name})")
 
                 # 情况2: 扫描直接放在目录下的 .onnx 文件
                 direct_files = list(base_dir.glob("*.onnx")) + list(base_dir.glob("*.pth"))
@@ -331,7 +337,6 @@ def scan_local_rmbg_models():
                             "original_name": model_name,
                             "source": source_name
                         }
-                        print(f"[智绘抠图] ✅ 发现本地模型: {normalized_name} (来自 {source_name})")
 
             except Exception as e:
                 print(f"⚠️ [智绘抠图] 扫描 {source_name} 目录时出错: {e}")
@@ -346,6 +351,16 @@ def scan_local_rmbg_models():
         return {}
 
 
+def is_model_available_locally(model_name):
+    """检查模型是否已在本地，避免自动下载"""
+    if model_name in LOCAL_MODELS_INFO:
+        return True
+    u2net_dir = Path(os.environ.get('U2NET_HOME', Path.home() / ".u2net"))
+    if (u2net_dir / f"{model_name}.onnx").exists():
+        return True
+    return False
+
+
 def get_all_available_models():
     """
     获取所有可用模型（本地模型 + 所有rembg标准模型）
@@ -353,34 +368,24 @@ def get_all_available_models():
     """
     all_models = {}
 
-    # 1. 添加所有 rembg 标准模型（使用友好显示名称）
-    for model_name in REMBG_STANDARD_MODELS:
-        display_name = REMBG_DISPLAY_NAMES.get(model_name, model_name)
-        all_models[display_name] = model_name
+    for std_model in REMBG_STANDARD_MODELS:
+        display_name = REMBG_DISPLAY_NAMES.get(std_model, std_model)
+        all_models[display_name] = std_model
 
-    # 2. 添加本地发现的模型（如果显示名称已存在则添加"本地"标记）
     local_models = scan_local_rmbg_models()
-    for model_name, model_info in local_models.items():
-        display_name = REMBG_DISPLAY_NAMES.get(model_name, model_name)
-
-        # 如果这个模型的标准名称已经在列表中，用本地标记覆盖
+    for local_model, model_info in local_models.items():
+        display_name = REMBG_DISPLAY_NAMES.get(local_model, local_model)
         if display_name in all_models:
-            # 添加"[本地]"标记表示已下载
-            local_display = f"{display_name} [本地已下载]"
-            all_models[local_display] = model_name
+            all_models[f"{display_name} [本地已下载]"] = local_model
         else:
-            all_models[display_name] = model_name
-
-    # 3. 添加向后兼容的中文友好名称（旧版本）
-    # 这些会被rembg自动下载
-    # all_models.update(MODEL_MAPPING)  # 暂时注释掉，避免重复
+            all_models[display_name] = local_model
 
     return all_models
 
 
-# 获取所有可用模型
-ALL_MODELS = get_all_available_models()
+# LOCAL_MODELS_INFO 必须在 get_all_available_models 之前初始化
 LOCAL_MODELS_INFO = scan_local_rmbg_models()
+ALL_MODELS = get_all_available_models()
 
 
 # ==================== 主节点 ====================
@@ -527,9 +532,7 @@ class ZH_BackgroundRemover:
         """执行背景移除"""
 
         if not REMBG_AVAILABLE:
-            print("❌ [智绘抠图] rembg 库未安装")
             error_mask = torch.zeros((images.shape[0], images.shape[1], images.shape[2]))
-            # 创建遮罩图像
             error_mask_image = error_mask.unsqueeze(-1).repeat(1, 1, 1, 3)
             return (images, error_mask, error_mask_image)
 
@@ -539,34 +542,20 @@ class ZH_BackgroundRemover:
         # 检查是否是本地模型
         is_local = model in LOCAL_MODELS_INFO or actual_model in LOCAL_MODELS_INFO
 
-        if is_local:
-            model_source = LOCAL_MODELS_INFO.get(actual_model, LOCAL_MODELS_INFO.get(model, {}))
-            print(f"📦 [智绘抠图] 使用本地模型: {model}")
-            print(f"   模型路径: {model_source.get('path', '未知')}")
-            print(f"   来源: {model_source.get('source', '未知')}")
-        else:
-            print(f"📦 [智绘抠图] 使用 rembg 模型: {model} -> {actual_model}")
-            print(f"   首次使用将自动下载模型，请稍候...")
-
-        # 打印高级选项状态
-        if 启用Alpha_Matting:
-            print(f"🔧 [智绘抠图] Alpha Matting 已启用")
-            print(f"   前景阈值: {Alpha前景阈值}, 背景阈值: {Alpha背景阈值}, 腐蚀大小: {Alpha腐蚀大小}")
-        if 形态学后处理:
-            print(f"🔧 [智绘抠图] 形态学后处理 已启用")
 
         try:
             # 初始化或切换模型
             if self.session is None or self.current_model != actual_model:
                 self.model_path = get_rembg_model_path()
-                print(f"🔄 [智绘抠图] 加载模型: {actual_model}...")
-
-                # 使用日志抑制器加载模型
+                if not is_model_available_locally(actual_model):
+                    raise RuntimeError(
+                        f"模型 [{actual_model}] 未下载。\n"
+                        f"请手动下载后放到 ComfyUI/models/RMBG/{actual_model}/ 目录，\n"
+                        f"或运行: pip install rembg 后首次执行自动下载（需科学上网）。"
+                    )
                 with SuppressRembgLogs():
                     self.session = new_session(actual_model)
-
                 self.current_model = actual_model
-                print(f"✅ [智绘抠图] 模型加载成功")
 
             # 批量处理图像
             result_images = []
@@ -575,11 +564,21 @@ class ZH_BackgroundRemover:
             for idx, img_tensor in enumerate(images):
                 # 转换为 PIL
                 pil_image = tensor2pil(img_tensor)
+                orig_w, orig_h = pil_image.size
 
-                # 执行背景移除（抑制处理日志）
+                # 按处理分辨率缩放送入模型
+                scale = min(处理分辨率 / max(orig_w, orig_h), 1.0)
+                if scale < 1.0:
+                    proc_w = int(orig_w * scale)
+                    proc_h = int(orig_h * scale)
+                    proc_image = pil_image.resize((proc_w, proc_h), Image.LANCZOS)
+                else:
+                    proc_image = pil_image
+
+                # 执行背景移除
                 with SuppressRembgLogs():
                     output = remove(
-                        pil_image,
+                        proc_image,
                         session=self.session,
                         alpha_matting=启用Alpha_Matting,
                         alpha_matting_foreground_threshold=Alpha前景阈值,
@@ -588,6 +587,10 @@ class ZH_BackgroundRemover:
                         post_process_mask=形态学后处理,
                         only_mask=False,
                     )
+
+                # 还原到原始尺寸
+                if scale < 1.0:
+                    output = output.resize((orig_w, orig_h), Image.LANCZOS)
 
                 # 确保输出为 RGBA
                 if output.mode != 'RGBA':
@@ -676,8 +679,6 @@ class ZH_BackgroundRemover:
                 result_images.append(result_img)
                 result_masks.append(mask_tensor)
 
-                print(f"✅ [智绘抠图] 处理完成 {idx+1}/{len(images)}")
-
             # 合并批次
             output_images = torch.cat(result_images, dim=0)
             output_masks = torch.stack(result_masks)
@@ -689,7 +690,6 @@ class ZH_BackgroundRemover:
                 mask_images.append(mask_image)
             mask_image_output = torch.cat(mask_images, dim=0)
 
-            print(f"🎉 [智绘抠图] 全部完成，共 {len(images)} 张")
             return (output_images, output_masks, mask_image_output)
 
         except Exception as e:
@@ -734,12 +734,6 @@ class ZH_BackgroundRemoverWithPrompt:
     CATEGORY = "智绘灵箱/图片"
 
     def segment_by_text(self, images, prompt, confidence_threshold):
-        """基于文本提示的分割（功能开发中）"""
-
-        print("🚧 [智绘提示词抠图] 功能开发中...")
-        print(f"   提示词: {prompt}")
-
-        # 返回原图和空白蒙版
         error_mask = torch.zeros((images.shape[0], images.shape[1], images.shape[2]))
         return (images, error_mask, images)
 
@@ -824,7 +818,6 @@ class ZH_BackgroundReplacer:
             else:  # 正常覆盖
                 result = foreground * mask_rgb + background * (1 - mask_rgb)
 
-            print(f"✅ [智绘抠图] 背景替换完成")
             return (result,)
 
         except Exception as e:

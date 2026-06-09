@@ -155,3 +155,5 @@ desktop.ini
 # models/
 # outputs/
 # temp/
+# Ruff cache
+.ruff_cache/

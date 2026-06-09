@@ -1,4 +1,4 @@
-# ComfyUI-ZHIHUI (智绘灵箱)
+# ComfyUI-ZhiHui (智绘灵箱)
 
 一个功能丰富的 ComfyUI 自定义节点插件，提供图像处理、文本操作、批处理等多种实用功能。
 
@@ -27,7 +27,7 @@ Then restart ComfyUI or reload nodes using ComfyUI Manager.
 
 ### 方法三：ComfyUI Manager 安装 / Method 3: ComfyUI Manager
 
-如果本插件已被 ComfyUI Manager 收录，可直接在 Manager 中搜索 "智绘灵箱" 或 "ZHIHUI" 进行安装。
+如果本插件已被 ComfyUI Manager 收录，可直接在 Manager 中搜索 "智绘灵箱" 或 "ComfyUI-ZhiHui" 进行安装。
 
 ## 📋 依赖要求 / Requirements
 
@@ -46,7 +46,7 @@ pip install -r requirements.txt
 ## 🎯 主要功能 / Main Features
 
 ### 🖼️ 图像处理 / Image Processing
-- **🎨 画板 (Drawing Board)**: 内置画板节点，支持多图层绘画、抠图、图形编辑
+- **智绘_画板 **: 支持多图层绘画、抠图、图形编辑
 - **智绘_九宫格拼图**: 批次图片网格排列拼接
 - **智绘_图片切换器**: 多图像智能切换选择
 - **智绘_制作批次**: 单图转批次处理
@@ -70,7 +70,7 @@ pip install -r requirements.txt
 ### 图像类节点 / Image Nodes
 | 节点名称 | 英文名称 | 功能描述 |
 |---------|---------|---------|
-| 🎨 画板 | Drawing Board | 多图层画板，支持画笔/橡皮/文字/图形/抠图，可接收上游图片输入 |
+| 🎨 智绘_画板 | Drawing Board | 多图层画板，支持画笔/橡皮/文字/图形/抠图，可接收上游图片输入 |
 | 🪣 智绘_九宫格拼图 | Grid Image Assembler | 批次图片网格排列拼接 |
 | 🔄 智绘_图片切换器 | Image Multi Switch | 多图像智能切换选择 |
 | 📦 智绘_制作批次 | Make Image Batch | 单图转批次处理 |
@@ -113,7 +113,7 @@ For detailed usage instructions, please refer to [DATONG_GUIDE.md](DATONG_GUIDE.
 
 ## 🔧 开发信息 / Development Info
 
-- **版本**: 1.0.0
+- **版本**: 1.1.0
 - **兼容性**: ComfyUI
 - **Python版本**: 3.8+
 - **许可证**: MIT License
